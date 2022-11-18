@@ -9,11 +9,6 @@ public class IPLayer implements BaseLayer {
     _IP m_sHeader;
     
     private int Header_Size = 20;
-    private int Max_Data = 1480;
-    private int offset = 185;
-    private int receivedLength = 0;
-    private ArrayList<byte[]> FragmentCollect = new ArrayList();
-    private byte[] SortFragment;
     
     //----------생성자-------------
     public IPLayer(String pName){
@@ -38,9 +33,9 @@ public class IPLayer implements BaseLayer {
        public _IP(){
           ip_verlen = 0x45;
           ip_tos = 0x00; // not use
-          ip_len = new byte[2];
+          ip_len = new byte[2]; // not use
           ip_id = new byte[2]; // not use
-          ip_fragoff = new byte[2];
+          ip_fragoff = new byte[2]; // not use
           ip_ttl = 0x00; // not use
           ip_proto = 0x06;
           ip_cksum = new byte[2]; // not use
@@ -61,46 +56,11 @@ public class IPLayer implements BaseLayer {
        }
     }
     
-    private boolean fragSend(byte[] input, int length){
-       int num = length / Max_Data; // 단편화 개수
-       byte[] array = new byte[Max_Data];
-       int len = Max_Data;
-       if(length % Max_Data != 0){ // 나머지 존재
-          num++;
-       }
-       for(int i = 0; i < num; i++){
-          if(i != num-1)
-             setHeader(Max_Data, 0, 1, i * offset);
-          else{
-             if(length % Max_Data != 0){
-                len = length % Max_Data;
-                setHeader(len, 0, 0, i * offset);
-                array = new byte[len];
-             }
-             else
-                setHeader(Max_Data, 0, 0, i * offset);
-          }
-          System.arraycopy(input, i*Max_Data, array, 0, array.length);
-          byte[] data = ObjToByte(m_sHeader, array, array.length); // header 추가
-          EthernetLayer ethernetLayer = (EthernetLayer)this.GetUnderLayer(0); 
-          ethernetLayer.Send(data, data.length);
-       }
-       return true;
-    }
-    
     public boolean Send(byte[] input, int length){
-      /*
-          * 이더넷 최대길이 1500byte, 최대 데이터 길이 = 1500 - ip헤더
-       */
        
-      if (length > Max_Data) { // 단편화 필요
-         fragSend(input, length);
-      } else { // 단편화 없음
-         setHeader(length, 1, 0, 0 * offset);
-         byte[] data = ObjToByte(m_sHeader, input, length); // header 추가
-          EthernetLayer ethernetLayer = (EthernetLayer)this.GetUnderLayer(0); 
-          ethernetLayer.Send(data, data.length);
-      }
+       byte[] data = ObjToByte(m_sHeader, input, length); // header 추가
+       EthernetLayer ethernetLayer = (EthernetLayer)this.GetUnderLayer(0); 
+       ethernetLayer.Send(data, data.length);
        return true;
     }
     
@@ -110,57 +70,33 @@ public class IPLayer implements BaseLayer {
        return true;
     }
     
-    private void setHeader(int length, int frag, int more, int fragoff){
-       this.m_sHeader.ip_len = intToByte2(length); // tcp에서 전송되는 데이터 최대 1480이라서 2바이트 변환이면 충분
-       // frag: 0(단편화 있음), 1(단편화 없음)  more: 0(마지막 데이터), 1(아직 데이터 남음)
-       // ip_fragoff 16비트 중 맨 앞은 0 1비트 frag 1비트  more 13비트 fragoff
-       this.m_sHeader.ip_fragoff[0] = (byte)(((frag & 0x1) << 6) | ((more & 0x1) << 5) | ((fragoff & 0x1f00) >> 8));
-       this.m_sHeader.ip_fragoff[1] = (byte)(fragoff & 0xff);     
-    }
-    
     public boolean Receive(byte[] input){
        if(chkSrc(input) == true)
           return false;
        if(chkDst(input) == false)
           return false;
-       int frag = GetFrag(input[6]);
-       int more = GetMore(input[6]);
-       int fragoff = GetFragoff(input[6], input[7]);
-       byte[] data;
-       if(frag == 1){ // 단편화 없음
-          data = RemoveHeader(input, input.length);
-          TCPLayer tcpLayer = (TCPLayer)this.GetUpperLayer(0);
-          tcpLayer.Receive(data);
-       }
-       else{ // 단편화
-          FragmentCollect.add(input);
-          receivedLength += input.length - Header_Size;
-          if(more == 0) { // // 마지막 데이터
-             int last = fragoff / offset; // sequence
-             SortFragment = new byte[receivedLength];
-             if(sortList(last) == false)
-                return false;
-             
-             TCPLayer tcpLayer = (TCPLayer)this.GetUpperLayer(0);
-             tcpLayer.Receive(SortFragment);
-             receivedLength = 0; // 초기화
-          }
-          
-          
-       }
-       return true;
-    }
-    
-    private boolean sortList(int last){
-       if(FragmentCollect.size() - 1 != last)
-          return false;
-       for(int count = 0; count <= last; count++){
-          byte[] fragdata = FragmentCollect.remove(0);
-          int fragoff = GetFragoff(fragdata[6], fragdata[7]);
-          int sequence = fragoff / offset;
-          fragdata = RemoveHeader(fragdata, fragdata.length);
-          System.arraycopy(fragdata, 0, SortFragment, sequence * Max_Data, fragdata.length);
-       }
+      
+//       if(frag == 1){ // 단편화 없음
+//          data = RemoveHeader(input, input.length);
+//          TCPLayer tcpLayer = (TCPLayer)this.GetUpperLayer(0);
+//          tcpLayer.Receive(data);
+//       }
+//       else{ // 단편화
+//          FragmentCollect.add(input);
+//          receivedLength += input.length - Header_Size;
+//          if(more == 0) { // // 마지막 데이터
+//             int last = fragoff / offset; // sequence
+//             SortFragment = new byte[receivedLength];
+//             if(sortList(last) == false)
+//                return false;
+//             
+//             TCPLayer tcpLayer = (TCPLayer)this.GetUpperLayer(0);
+//             tcpLayer.Receive(SortFragment);
+//             receivedLength = 0; // 초기화
+//          }
+//          
+//          
+//       }
        return true;
     }
     
@@ -193,32 +129,18 @@ public class IPLayer implements BaseLayer {
        return buf;
     }
     
-    private int GetFrag(byte value){
-       int frag = (int)((value & 0x40) >> 6);
-       return frag;
-    }
     
-    private int GetMore(byte value){
-       int more = (int)((value & 0x20) >> 5);
-       return more;
-    }
-    
-    private int GetFragoff(byte value1, byte value2){
-       int fragoff = (int)(((value1 & 0x1f) << 8) | (value2 & 0xff));
-       return fragoff;
-    }
-    
-    private byte[] intToByte2(int value) {
-        byte[] temp = new byte[2];
-        temp[0] |= (byte) ((value & 0xff00) >> 8);
-        temp[1] |= (byte) (value & 0xff);
-
-        return temp;
-    }
-
-    private int byte2ToInt(byte value1, byte value2) {
-        return (int)(((value1 & 0xff) << 8) | (value2 & 0xff));
-    }
+//    private byte[] intToByte2(int value) {
+//        byte[] temp = new byte[2];
+//        temp[0] |= (byte) ((value & 0xff00) >> 8);
+//        temp[1] |= (byte) (value & 0xff);
+//
+//        return temp;
+//    }
+//
+//    private int byte2ToInt(byte value1, byte value2) {
+//        return (int)(((value1 & 0xff) << 8) | (value2 & 0xff));
+//    }
     
     public boolean chkSrc(byte[] input){ // 내가 보낸 것인지 확인
        for(int i = 0; i < 4; i++)
