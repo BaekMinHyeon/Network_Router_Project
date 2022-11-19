@@ -6,6 +6,7 @@ public class IPLayer implements BaseLayer {
     public String pLayerName = null;
     public ArrayList<BaseLayer> p_aUnderLayer = new ArrayList<BaseLayer>();
     public ArrayList<BaseLayer> p_aUpperLayer = new ArrayList<BaseLayer>();
+    public ArrayList<_Router> routingtable = new ArrayList<_Router>();
     _IP m_sHeader;
     
     private int Header_Size = 20;
@@ -56,17 +57,42 @@ public class IPLayer implements BaseLayer {
        }
     }
     
+    public class _Router {
+    	_IP_ADDR ip_dst_addr = null;
+    	_IP_ADDR subnet_mask = null;
+    	String gateway = null;
+    	String flag = null;
+    	String inter_face = null;
+    	
+    	public _Router(_IP_ADDR ip_dst_addr, _IP_ADDR subnet_mask, String gateway, String flag, String inter_face){
+    		this.ip_dst_addr = ip_dst_addr;
+    		this.subnet_mask = subnet_mask;
+    		this.gateway = gateway;
+    		this.flag = flag;
+    		this.inter_face = inter_face;
+    	}
+    }
+    
+    public boolean RoutingTableSet(_IP_ADDR ip_dst_addr, _IP_ADDR subnet_mask, String gateway, String flag, String inter_face){
+    	routingtable.add(new _Router(ip_dst_addr, subnet_mask, gateway, flag, inter_face));
+    	return true;
+    }
+    
+    public boolean RoutingTableDelete(byte[] ip_addr){
+    	for(int i = 0; i < routingtable.size(); i++){
+            if (routingtable.get(i).ip_dst_addr.equals(ip_addr)) {
+                routingtable.remove(i);
+                return true;
+            }
+        }
+    	return false;
+    }
+    
     public boolean Send(byte[] input, int length){
        
        byte[] data = ObjToByte(m_sHeader, input, length); // header 추가
-       EthernetLayer ethernetLayer = (EthernetLayer)this.GetUnderLayer(0); 
-       ethernetLayer.Send(data, data.length);
-       return true;
-    }
-    
-    public boolean arpSend(){
-       ARPLayer arpLayer = (ARPLayer)this.GetUnderLayer(1);
-       arpLayer.Send();
+       ARPLayer arpLayer = (ARPLayer)this.GetUnderLayer(0);
+       arpLayer.Send(data, data.length);
        return true;
     }
     
@@ -75,29 +101,38 @@ public class IPLayer implements BaseLayer {
           return false;
        if(chkDst(input) == false)
           return false;
-      
-//       if(frag == 1){ // 단편화 없음
-//          data = RemoveHeader(input, input.length);
-//          TCPLayer tcpLayer = (TCPLayer)this.GetUpperLayer(0);
-//          tcpLayer.Receive(data);
-//       }
-//       else{ // 단편화
-//          FragmentCollect.add(input);
-//          receivedLength += input.length - Header_Size;
-//          if(more == 0) { // // 마지막 데이터
-//             int last = fragoff / offset; // sequence
-//             SortFragment = new byte[receivedLength];
-//             if(sortList(last) == false)
-//                return false;
-//             
-//             TCPLayer tcpLayer = (TCPLayer)this.GetUpperLayer(0);
-//             tcpLayer.Receive(SortFragment);
-//             receivedLength = 0; // 초기화
-//          }
-//          
-//          
-//       }
+       _IP_ADDR dst = new _IP_ADDR();
+       _IP_ADDR final_dst = new _IP_ADDR();
+       System.arraycopy(input, 16, dst, 0, dst.addr.length);
+       _Router match = null;
+       int index = 0;
+       for(_Router row : routingtable){
+    	   _IP_ADDR subnetmask = row.subnet_mask;
+    	   _IP_ADDR result = Calculation(dst, subnetmask);
+    	   if(row.ip_dst_addr.equals(result)){
+    		   match = routingtable.get(index);
+    		   break;
+    	   }
+    	   index++;
+       }
+       if(match.flag.equals("U")){}
+       else if(match.flag.equals("UG")){
+    	   final_dst = StringToByte4(match.gateway);
+       }
+       else if(match.flag.equals("UH")){ // IP는 자신에게 오는 것을 거절하는데 이것이 왜 필요하지?
+    	   final_dst = dst;
+       }
+       ARPLayer arpLayer = (ARPLayer)this.GetUnderLayer(0);
+       arpLayer.SetIpDstAddress(final_dst.addr);
+       Send(input, input.length);
        return true;
+    }
+    
+    private _IP_ADDR Calculation(_IP_ADDR dst, _IP_ADDR subnetmask){
+    	_IP_ADDR result = new _IP_ADDR();
+    	for(int i = 0; i < dst.addr.length; i++)
+    		result.addr[i] = (byte) (dst.addr[i] & subnetmask.addr[i]);
+    	return result;
     }
     
     private byte[] ObjToByte(_IP Header, byte[] input, int length) {//data에 헤더 붙여주기
@@ -129,6 +164,14 @@ public class IPLayer implements BaseLayer {
        return buf;
     }
     
+    private _IP_ADDR StringToByte4(String value){
+    	_IP_ADDR temp = new _IP_ADDR();
+    	String[] ip = value.split("\\.");
+    	for (int i = 0; i < 4; i++) {
+            temp.addr[i] = (byte) Integer.parseInt(ip[i]);
+         }
+    	return temp;
+    }
     
 //    private byte[] intToByte2(int value) {
 //        byte[] temp = new byte[2];
