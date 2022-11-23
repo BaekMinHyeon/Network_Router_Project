@@ -14,6 +14,7 @@ public class RoutingTable implements BaseLayer {
     	String gateway = null;
     	String flag = null;
     	String inter_face = null;
+    	int metric = 1;
     	
     	public _Router(byte[] ip_dst_addr, byte[] subnet_mask, String gateway, String flag, String inter_face){
     		this.ip_dst_addr = ip_dst_addr;
@@ -86,6 +87,26 @@ public class RoutingTable implements BaseLayer {
             temp[i] = (byte) Integer.parseInt(ip[i]);
          }
     	return temp;
+    }
+    
+    private String Byte4ToString(byte[] value){
+    	return String.format("%d.%d.%d.%d", value[0]&0xff, value[1]&0xff, value[2]&0xff, value[3]&0xff);
+    }
+    
+    public void printRT() {
+        ApplicationLayer applicationLayer = (ApplicationLayer) this.GetUpperLayer(0);
+        String s = "";
+        for (int i = 0; i < routingtable.size(); i++) {
+            String dst = Byte4ToString(routingtable.get(i).ip_dst_addr);
+            String subnetmask = Byte4ToString(routingtable.get(i).subnet_mask);
+            String gateway = routingtable.get(i).gateway;
+            String flag = routingtable.get(i).flag;
+            String inter_face = routingtable.get(i).inter_face;
+            String metric = Integer.toString(routingtable.get(i).metric);
+            
+            s = dst + "   " + subnetmask + "   " + gateway + "   " + flag + "   " + inter_face + "   " + metric + "\n";
+        }
+        applicationLayer.RoutingtablePrint(s);
     }
     
     @Override
