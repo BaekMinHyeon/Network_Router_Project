@@ -39,6 +39,11 @@ public class ApplicationLayer extends JFrame implements BaseLayer {
    private JTextField DestinationWrite;
    private JTextField NetmaskWrite;
    private JTextField GatewayWrite;
+   private JTextField DeleteIpWrite;
+   private JTextField EntryIpWrite;
+   private JTextField EntryEthernetWrite;
+   private JTextField EntryInterfaceWrite;
+   private JTextField DeleteProxyIpWrite;
 
    Container contentPane;
 
@@ -60,6 +65,12 @@ public class ApplicationLayer extends JFrame implements BaseLayer {
    JButton Arp_Cache_Delete_Button;
    JButton Proxy_Arp_Add_Button;
    JButton Proxy_Arp_Delete_Button;
+   JButton ItemDelete_Accept_Button;
+   JButton ItemDelete_Cancel_Button;
+   JButton ProxyArpEntry_Accept_Button;
+   JButton ProxyArpEntry_Cancel_Button;
+   JButton ProxyDelete_Accept_Button;
+   JButton ProxyDelete_Cancel_Button;
 
    int adapterNumber = 0;
 
@@ -164,24 +175,257 @@ public class ApplicationLayer extends JFrame implements BaseLayer {
       ProxyArpPanel.add(Proxy_Arp_Delete_Button);
 
       setVisible(true);
-
    }
+   
+   class ItemDelete extends JFrame {
+	      public ItemDelete() {
+	         setTitle("Item Delete");
+	         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	         setBounds(250, 250, 300, 250);
+	         contentPane = new JPanel();
+	         ((JComponent) contentPane).setBorder(new EmptyBorder(5, 5, 5, 5));
+	         setContentPane(contentPane);
+	         contentPane.setLayout(null);
+
+	         JLabel DeleteIpLabel = new JLabel("IP 주소");
+	         DeleteIpLabel.setBounds(60, 70, 50, 20);
+	         contentPane.add(DeleteIpLabel);
+
+	         JPanel DeleteIpEditorPanel = new JPanel();
+	         DeleteIpEditorPanel.setBounds(120, 70, 120, 20);
+	         contentPane.add(DeleteIpEditorPanel);
+	         DeleteIpEditorPanel.setLayout(null);
+
+	         DeleteIpWrite = new JTextField();
+	         DeleteIpWrite.setBounds(0, 0, 120, 20);
+	         DeleteIpEditorPanel.add(DeleteIpWrite);
+	         DeleteIpWrite.setColumns(10);
+
+	         ItemDelete_Accept_Button = new JButton("Delete");
+	         ItemDelete_Accept_Button.setBounds(50, 150, 80, 30);
+	         ItemDelete_Accept_Button.addActionListener(new setAddressListener());
+	         contentPane.add(ItemDelete_Accept_Button);
+
+	         ItemDelete_Cancel_Button = new JButton("Cancel");
+	         ItemDelete_Cancel_Button.setBounds(160, 150, 80, 30);
+	         ItemDelete_Cancel_Button.addActionListener(new setAddressListener());
+	         contentPane.add(ItemDelete_Cancel_Button);
+
+	         ItemDelete_Accept_Button.addActionListener(new ActionListener() {
+	            public void actionPerformed(ActionEvent e) {
+	               dispose();
+	            }
+	         });
+
+	         ItemDelete_Cancel_Button.addActionListener(new ActionListener() {
+	            public void actionPerformed(ActionEvent e) {
+	               dispose();
+	            }
+	         });
+
+	         setVisible(true);
+	      }
+	   }   
+   
+   class ProxyArpEntry extends JFrame {
+	      public ProxyArpEntry() {
+	         setTitle("Proxy ARP Entry 추가");
+	         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	         setBounds(250, 250, 300, 250);
+	         contentPane = new JPanel();
+	         ((JComponent) contentPane).setBorder(new EmptyBorder(5, 5, 5, 5));
+	         setContentPane(contentPane);
+	         contentPane.setLayout(null);
+
+	         JLabel EntryIpLabel = new JLabel("IP 주소");
+	         EntryIpLabel.setBounds(61, 30, 50, 20);
+	         contentPane.add(EntryIpLabel);
+
+	         JPanel EntryIpEditorPanel = new JPanel();
+	         EntryIpEditorPanel.setBounds(120, 30, 120, 20);
+	         contentPane.add(EntryIpEditorPanel);
+	         EntryIpEditorPanel.setLayout(null);
+
+	         EntryIpWrite = new JTextField();
+	         EntryIpWrite.setBounds(0, 0, 120, 20);
+	         EntryIpEditorPanel.add(EntryIpWrite);
+	         EntryIpWrite.setColumns(10);
+
+	         JLabel EntryEthernetLabel = new JLabel("Ethernet 주소");
+	         EntryEthernetLabel.setBounds(23, 70, 80, 20);
+	         contentPane.add(EntryEthernetLabel);
+
+	         JPanel EntryEthernetEditorPanel = new JPanel();
+	         EntryEthernetEditorPanel.setBounds(120, 70, 120, 20);
+	         contentPane.add(EntryEthernetEditorPanel);
+	         EntryEthernetEditorPanel.setLayout(null);
+
+	         EntryEthernetWrite = new JTextField();
+	         EntryEthernetWrite.setBounds(0, 0, 120, 20);
+	         EntryEthernetEditorPanel.add(EntryEthernetWrite);
+	         EntryEthernetWrite.setColumns(10);
+	         
+	         JLabel InterfaceLabel = new JLabel("Interface");
+	         InterfaceLabel.setBounds(48, 110, 60, 20);
+	         contentPane.add(InterfaceLabel);
+
+	         JPanel EntryInterfaceEditorPanel = new JPanel();
+	         EntryInterfaceEditorPanel.setBounds(120, 110, 120, 20);
+	         contentPane.add(EntryInterfaceEditorPanel);
+	         EntryInterfaceEditorPanel.setLayout(null);
+
+	         EntryInterfaceWrite = new JTextField();
+	         EntryInterfaceWrite.setBounds(0, 0, 120, 20);
+	         EntryInterfaceEditorPanel.add(EntryInterfaceWrite);
+	         EntryInterfaceWrite.setColumns(10);
+
+	         ProxyArpEntry_Accept_Button = new JButton("OK");
+	         ProxyArpEntry_Accept_Button.setBounds(50, 150, 80, 30);
+	         ProxyArpEntry_Accept_Button.addActionListener(new setAddressListener());
+	         contentPane.add(ProxyArpEntry_Accept_Button);
+
+	         ProxyArpEntry_Cancel_Button = new JButton("Cancel");
+	         ProxyArpEntry_Cancel_Button.setBounds(160, 150, 80, 30);
+	         ProxyArpEntry_Cancel_Button.addActionListener(new setAddressListener());
+	         contentPane.add(ProxyArpEntry_Cancel_Button);
+
+	         ProxyArpEntry_Accept_Button.addActionListener(new ActionListener() {
+	            public void actionPerformed(ActionEvent e) {
+	               dispose();
+	            }
+	         });
+
+	         ProxyArpEntry_Cancel_Button.addActionListener(new ActionListener() {
+	            public void actionPerformed(ActionEvent e) {
+	               dispose();
+	            }
+	         });
+
+	         setVisible(true);
+	      }
+	   }
+   
+   class ProxyDelete extends JFrame {
+	      public ProxyDelete() {
+	         setTitle("Proxy Delete");
+	         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	         setBounds(250, 250, 300, 250);
+	         contentPane = new JPanel();
+	         ((JComponent) contentPane).setBorder(new EmptyBorder(5, 5, 5, 5));
+	         setContentPane(contentPane);
+	         contentPane.setLayout(null);
+
+	         JLabel DeleteProxyIpLabel = new JLabel("IP 주소");
+	         DeleteProxyIpLabel.setBounds(60, 70, 50, 20);
+	         contentPane.add(DeleteProxyIpLabel);
+
+	         JPanel DeleteProxyIpEditorPanel = new JPanel();
+	         DeleteProxyIpEditorPanel.setBounds(120, 70, 120, 20);
+	         contentPane.add(DeleteProxyIpEditorPanel);
+	         DeleteProxyIpEditorPanel.setLayout(null);
+
+	         DeleteProxyIpWrite = new JTextField();
+	         DeleteProxyIpWrite.setBounds(0, 0, 120, 20);
+	         DeleteProxyIpEditorPanel.add(DeleteProxyIpWrite);
+	         DeleteProxyIpWrite.setColumns(10);
+
+	         ProxyDelete_Accept_Button = new JButton("Delete");
+	         ProxyDelete_Accept_Button.setBounds(50, 150, 80, 30);
+	         ProxyDelete_Accept_Button.addActionListener(new setAddressListener());
+	         contentPane.add(ProxyDelete_Accept_Button);
+
+	         ProxyDelete_Cancel_Button = new JButton("Cancel");
+	         ProxyDelete_Cancel_Button.setBounds(160, 150, 80, 30);
+	         ProxyDelete_Cancel_Button.addActionListener(new setAddressListener());
+	         contentPane.add(ProxyDelete_Cancel_Button);
+
+	         ProxyDelete_Accept_Button.addActionListener(new ActionListener() {
+	            public void actionPerformed(ActionEvent e) {
+	               dispose();
+	            }
+	         });
+
+	         ProxyDelete_Cancel_Button.addActionListener(new ActionListener() {
+	            public void actionPerformed(ActionEvent e) {
+	               dispose();
+	            }
+	         });
+
+	         setVisible(true);
+	      }
+	  }
 
    class setAddressListener implements ActionListener {
       @Override
       public void actionPerformed(ActionEvent e) {
+    	  if (e.getSource() == Arp_Cache_Delete_Button) {
+              new ItemDelete();
+          }
+    	  
+    	  if (e.getSource() == ItemDelete_Accept_Button) {
+              byte[] deleteIpAddress = new byte[4];
+
+              String dstIp = DeleteIpWrite.getText();
+
+              String[] byte_delete_ip = dstIp.split("\\.");
+              for (int i = 0; i < 4; i++) {
+                 deleteIpAddress[i] =  (byte) (Integer.parseInt(byte_delete_ip[i])); 
+              }
+
+              ((ARPLayer) m_LayerMgr.GetLayer("ARP")).ArpTableDelete(deleteIpAddress);
+          }
+    	  
+    	  if (e.getSource() == Proxy_Arp_Add_Button) {
+              new ProxyArpEntry();
+          }
+    	  
+    	  if (e.getSource() == ProxyArpEntry_Accept_Button) {
+              byte[] proxyEthernetAddress = new byte[6];
+              byte[] proxyIpAddress = new byte[4];
+
+              String proxyEthernet = EntryEthernetWrite.getText();
+              String proxyIp = EntryIpWrite.getText();
+              String proxyInterface = EntryInterfaceWrite.getText();
+
+              String[] byte_proxy_ethernet = proxyEthernet.split("-");
+              for (int i = 0; i < 6; i++) {
+                 proxyEthernetAddress[i] = (byte) Integer.parseInt(byte_proxy_ethernet[i], 16);
+              }
+
+              String[] byte_proxy_ip = proxyIp.split("\\.");
+              for (int i = 0; i < 4; i++) {
+                 proxyIpAddress[i] = (byte) (Integer.parseInt(byte_proxy_ip[i])); 
+              }
+
+              ((ARPLayer) m_LayerMgr.GetLayer("ARP")).ProxyTableSet(proxyInterface, proxyEthernetAddress, proxyIpAddress);
+          }
+    	  
+    	  if (e.getSource() == Proxy_Arp_Delete_Button) {
+              new ProxyDelete();
+          }
+    	  
+    	  if (e.getSource() == ProxyDelete_Accept_Button) {
+              byte[] deleteIpAddress = new byte[4];
+
+              String dstIp = DeleteProxyIpWrite.getText();
+
+              String[] byte_delete_ip = dstIp.split("\\."); 
+              for (int i = 0; i < 4; i++) {
+                 deleteIpAddress[i] =  (byte) (Integer.parseInt(byte_delete_ip[i])); 
+              }
+
+              ((ARPLayer) m_LayerMgr.GetLayer("ARP")).ProxyTableDelete(deleteIpAddress);
+          }
       }
    }
    
-   public String get_MacAddress(byte[] byte_MacAddress) { //MAC Byte주소를 String으로 변환
+   public String get_MacAddress(byte[] byte_MacAddress) { 
 
       String MacAddress = "";
       for (int i = 0; i < 6; i++) {
-         //2자리 16진수를 대문자로, 그리고 1자리 16진수는 앞에 0을 붙임.
          MacAddress += String.format("%02X%s", byte_MacAddress[i], (i < MacAddress.length() - 1) ? "" : "");
 
          if (i != 5) {
-            //2자리 16진수 자리 단위 뒤에 "-"붙여주기
             MacAddress += "-";
          }
       }
