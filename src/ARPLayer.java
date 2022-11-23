@@ -85,8 +85,8 @@ public class ARPLayer implements BaseLayer {
                         real_address += "-";
                 }
 
-                ApplicationLayer chatFileDlg = (ApplicationLayer)this.GetUpperLayer(0);
-                chatFileDlg.setDstMacAddress(real_address);
+                ApplicationLayer app = (ApplicationLayer)this.GetUpperLayer(0);
+                app.setDstMacAddress(real_address);
                 return;
             }
         }
@@ -188,12 +188,6 @@ public class ARPLayer implements BaseLayer {
         return false;
     }
 
-    public boolean ArpTableAllDelete(){
-        arpTable.clear();
-        printArp();
-        return true;
-    }
-
     public boolean ProxyTableDelete(byte[] ip_addr) {
         for(int i = 0; i < proxyTable.size(); i++){
             if (proxyTable.get(i).ip_target_addr.addr[0] ==  ip_addr[0]
@@ -209,8 +203,8 @@ public class ARPLayer implements BaseLayer {
         return false;
     }
 
-    public boolean ProxyTableSet(String name, byte[] enthernet_addr, byte[] ip_addr) {
-        proxyTable.add(new _PROXY_ARP_ARR(name, enthernet_addr, ip_addr));
+    public boolean ProxyTableSet(String interface, byte[] enthernet_addr, byte[] ip_addr) {
+        proxyTable.add(new _PROXY_ARP_ARR(interface, enthernet_addr, ip_addr));
         printProxyArp();
         return true;
     }
@@ -504,12 +498,12 @@ public class ARPLayer implements BaseLayer {
 
     public class _PROXY_ARP_ARR {
 
-        String name;
+        String interface;
         _ARP_ENTHERNET_ADDR enet_target_addr;
         _ARP_IP_ADDR ip_target_addr;
 
-        public _PROXY_ARP_ARR(String name, byte[] enthernet_addr, byte[] ip_addr) {
-            this.name = name;
+        public _PROXY_ARP_ARR(String interface, byte[] enthernet_addr, byte[] ip_addr) {
+            this.interface = interface;
             enet_target_addr = new _ARP_ENTHERNET_ADDR(enthernet_addr);
             ip_target_addr = new _ARP_IP_ADDR(ip_addr);
         }
