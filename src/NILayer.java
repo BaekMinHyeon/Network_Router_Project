@@ -21,24 +21,13 @@ public class NILayer implements BaseLayer {
 	public ArrayList<PcapIf> m_pAdapterList;
 	StringBuilder errbuf = new StringBuilder();
 
-	static {
-		try {
-			System.load(new File("jnetpcap.dll").getAbsolutePath());
-			System.out.println(new File("jnetpcap.dll").getAbsolutePath());
-		} catch (UnsatisfiedLinkError e) {
-			System.out.println("Native code library failed to load. \n" + e);
-			System.exit(0);
-
-		}
-
-	}
-
 	public NILayer(String pName) {
 		// super(pName);
 		pLayerName = pName;
+		device = RoutingTable.jnet.getPcapIf();
 		m_pAdapterList = new ArrayList<PcapIf>();
 		m_iNumAdapter = 0;
-		SetAdapterList();
+		PacketStartDriver();
 	}
 	
 	public void clean(){
@@ -49,30 +38,21 @@ public class NILayer implements BaseLayer {
 		int snaplen = 64 * 1024; // Capture all packets, no trucation
 		int flags = Pcap.MODE_PROMISCUOUS; // capture all packets
 		int timeout = 10 * 1000; // 10 seconds in millis
-		m_AdapterObject = Pcap.openLive(m_pAdapterList.get(m_iNumAdapter).getName(), snaplen, flags, timeout, errbuf);
+		StringBuilder errbuf = new StringBuilder();
+		m_AdapterObject = Pcap.openLive(m_pAdapter.getName(), snaplen, flags, timeout, errbuf);
 	}
 
-	public PcapIf GetAdapterObject(int iIndex) {
-		return m_pAdapterList.get(iIndex);
+	public byte[] getAdapterIP() {
+		return this.m_pAdapter.getAddresses().get(0).getAddr().getData();
 	}
-
-	public void SetAdapterNumber(int iNum) {
-		m_iNumAdapter = iNum;
-		PacketStartDriver();
-		Receive();
-	}
-
-	public void SetAdapterList() {
-		// ���� ��ǻ�Ϳ� �����ϴ� ��� ��Ʈ��ũ ��� ��� ��������
-		int r = Pcap.findAllDevs(m_pAdapterList, errbuf);
-		System.out.println("I/F 갯수: "+m_pAdapterList.size());
-		// ��Ʈ��ũ ��Ͱ� �ϳ��� �������� ���� ��� ���� ó��
-		if (r == Pcap.NOT_OK || m_pAdapterList.isEmpty())
-			System.out.println("[Error] ��Ʈ��ũ ����͸� ���� ���Ͽ����ϴ�. Error : " + errbuf.toString());
-	}
-
-	public ArrayList<PcapIf> getAdapterList() {
-		return m_pAdapterList;
+	
+	public byte[] getAdapterMAC() {
+		try {
+			return this.m_pAdapter.getHardwareAddress();
+		} catch(IOException err) {
+			err.printStackTrace();
+		}
+		return null;
 	}
 
 	public boolean Send(byte[] input, int length) {
