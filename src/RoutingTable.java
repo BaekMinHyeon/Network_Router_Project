@@ -27,6 +27,7 @@ public class RoutingTable implements BaseLayer {
     
     public boolean RoutingTableSet(byte[] ip_dst_addr, byte[] subnet_mask, String gateway, String flag, String inter_face){
     	routingtable.add(new _Router(ip_dst_addr, subnet_mask, gateway, flag, inter_face));
+    	printRT();
     	return true;
     }
     
@@ -34,6 +35,7 @@ public class RoutingTable implements BaseLayer {
     	for(int i = 0; i < routingtable.size(); i++){
             if (routingtable.get(i).ip_dst_addr.equals(ip_addr)) {
                 routingtable.remove(i);
+                printRT();
                 return true;
             }
         }
