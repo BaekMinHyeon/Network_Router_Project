@@ -8,6 +8,7 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
@@ -44,6 +45,11 @@ public class ApplicationLayer extends JFrame implements BaseLayer {
    private JTextField EntryEthernetWrite;
    private JTextField EntryInterfaceWrite;
    private JTextField DeleteProxyIpWrite;
+   private JTextField RoutingDestinationWrite;
+   private JTextField RoutingNetmaskWrite;
+   private JTextField RoutingGatewayWrite;
+   private JTextField RoutingInterfaceWrite;
+   private JTextField DeleteTableIpWrite;
 
    Container contentPane;
 
@@ -71,6 +77,15 @@ public class ApplicationLayer extends JFrame implements BaseLayer {
    JButton ProxyArpEntry_Cancel_Button;
    JButton ProxyDelete_Accept_Button;
    JButton ProxyDelete_Cancel_Button;
+   JButton TableAdd_Accept_Button;
+   JButton TableAdd_Cancel_Button;
+   JButton TableDelete_Accept_Button;
+   JButton TableDelete_Cancel_Button;
+   
+   JCheckBox UP_Box;
+   JCheckBox Gateway_Box;
+   JCheckBox Host_Box;
+   
 
    int adapterNumber = 0;
 
@@ -86,8 +101,20 @@ public class ApplicationLayer extends JFrame implements BaseLayer {
       m_LayerMgr.AddLayer(new EthernetLayer("Ethernet"));
       m_LayerMgr.AddLayer(new ARPLayer("ARP"));
       m_LayerMgr.AddLayer(new IPLayer("IP"));
+      
+      m_LayerMgr.AddLayer(new NILayer("NI2"));
+      m_LayerMgr.AddLayer(new EthernetLayer("Ethernet2"));
+      m_LayerMgr.AddLayer(new ARPLayer("ARP2"));
+      m_LayerMgr.AddLayer(new IPLayer("IP2"));
+      
       m_LayerMgr.AddLayer(new ApplicationLayer("GUI"));
-      m_LayerMgr.ConnectLayers("");
+      m_LayerMgr.AddLayer(new RoutingTable("RT"));
+      
+      m_LayerMgr.ConnectLayers("NI ( *Ethernet ( *IP ( *RT ( *GUI ) ) ) )");
+      m_LayerMgr.ConnectLayers("Ethernet ( *ARP ( +IP ) )");
+      
+      m_LayerMgr.ConnectLayers("NI2 ( *Ethernet2 ( *IP2 ( *RT ( *GUI ) ) ) )");
+      m_LayerMgr.ConnectLayers("Ethernet2 ( *ARP2 ( +IP2 ) )");
    }
 
    public ApplicationLayer(String pName) {
@@ -354,6 +381,164 @@ public class ApplicationLayer extends JFrame implements BaseLayer {
 	         setVisible(true);
 	      }
 	  }
+   
+   class TableAdd extends JFrame {
+	   public TableAdd() {
+		     setTitle("Add Routing Table");
+	         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	         setBounds(250, 250, 350, 250);
+	         contentPane = new JPanel();
+	         ((JComponent) contentPane).setBorder(new EmptyBorder(5, 5, 5, 5));
+	         setContentPane(contentPane);
+	         contentPane.setLayout(null);
+	         
+	         JLabel RoutingDestination = new JLabel("Destination");
+	         RoutingDestination.setBounds(50, 20, 70, 20);
+	         contentPane.add(RoutingDestination);
+	         
+	         JPanel RoutingDestinationEditorPanel = new JPanel();
+	         RoutingDestinationEditorPanel.setBounds(130, 20, 120, 20);
+	         contentPane.add(RoutingDestinationEditorPanel);
+	         RoutingDestinationEditorPanel.setLayout(null);
+
+	         RoutingDestinationWrite = new JTextField();
+	         RoutingDestinationWrite.setBounds(0, 0, 120, 20);
+	         RoutingDestinationEditorPanel.add(RoutingDestinationWrite);
+	         RoutingDestinationWrite.setColumns(10);
+	         
+	         JLabel RoutingNetmask = new JLabel("Netmask");
+	         RoutingNetmask.setBounds(50, 50, 70, 20);
+	         contentPane.add(RoutingNetmask);
+	         
+	         JPanel RoutingNetmaskEditorPanel = new JPanel();
+	         RoutingNetmaskEditorPanel.setBounds(130, 50, 120, 20);
+	         contentPane.add(RoutingNetmaskEditorPanel);
+	         RoutingNetmaskEditorPanel.setLayout(null);
+
+	         RoutingNetmaskWrite = new JTextField();
+	         RoutingNetmaskWrite.setBounds(0, 0, 120, 20);
+	         RoutingNetmaskEditorPanel.add(RoutingNetmaskWrite);
+	         RoutingNetmaskWrite.setColumns(10);
+	         
+	         JLabel RoutingGateway = new JLabel("Gateway");
+	         RoutingGateway.setBounds(50, 80, 70, 20);
+	         contentPane.add(RoutingGateway);
+	         
+	         JPanel RoutingGatewayEditorPanel = new JPanel();
+	         RoutingGatewayEditorPanel.setBounds(130, 80, 120, 20);
+	         contentPane.add(RoutingGatewayEditorPanel);
+	         RoutingGatewayEditorPanel.setLayout(null);
+
+	         RoutingGatewayWrite = new JTextField();
+	         RoutingGatewayWrite.setBounds(0, 0, 120, 20);
+	         RoutingGatewayEditorPanel.add(RoutingGatewayWrite);
+	         RoutingGatewayWrite.setColumns(10);
+	         
+	         JLabel RoutingFlag = new JLabel("Flag");
+	         RoutingFlag.setBounds(50, 110, 70, 20);
+	         contentPane.add(RoutingFlag);
+	         
+	         UP_Box = new JCheckBox("UP");
+	         UP_Box.setBounds(125, 110, 45, 20);
+	         contentPane.add(UP_Box);
+	         
+	         Gateway_Box = new JCheckBox("Gateway");
+	         Gateway_Box.setBounds(170, 110, 80, 20);
+	         contentPane.add(Gateway_Box);
+	         
+	         Host_Box = new JCheckBox("Host");
+	         Host_Box.setBounds(250, 110, 60, 20);
+	         contentPane.add(Host_Box);
+	         
+	         JLabel RoutingInterface = new JLabel("Interface");
+	         RoutingInterface.setBounds(50, 140, 70, 20);
+	         contentPane.add(RoutingInterface);
+	         
+	         JPanel RoutingInterfaceEditorPanel = new JPanel();
+	         RoutingInterfaceEditorPanel.setBounds(130, 140, 120, 20);
+	         contentPane.add(RoutingInterfaceEditorPanel);
+	         RoutingInterfaceEditorPanel.setLayout(null);
+
+	         RoutingInterfaceWrite = new JTextField();
+	         RoutingInterfaceWrite.setBounds(0, 0, 120, 20);
+	         RoutingInterfaceEditorPanel.add(RoutingInterfaceWrite);
+	         RoutingInterfaceWrite.setColumns(10);
+	         
+	         TableAdd_Accept_Button = new JButton("Add");
+	         TableAdd_Accept_Button.setBounds(70, 170, 80, 30);
+	         TableAdd_Accept_Button.addActionListener(new setAddressListener());
+	         contentPane.add(TableAdd_Accept_Button);
+
+	         TableAdd_Cancel_Button = new JButton("Cancel");
+	         TableAdd_Cancel_Button.setBounds(180, 170, 80, 30);
+	         TableAdd_Cancel_Button.addActionListener(new setAddressListener());
+	         contentPane.add(TableAdd_Cancel_Button);
+	         
+	         TableAdd_Accept_Button.addActionListener(new ActionListener() {
+		            public void actionPerformed(ActionEvent e) {
+		               dispose();
+		            }
+		     });
+
+	         TableAdd_Cancel_Button.addActionListener(new ActionListener() {
+		            public void actionPerformed(ActionEvent e) {
+		               dispose();
+		            }
+		     });
+	         
+	         setVisible(true);
+	   }
+   }
+   
+   class TableDelete extends JFrame {
+	      public TableDelete() {
+	         setTitle("Delete Routing Table");
+	         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	         setBounds(250, 250, 300, 250);
+	         contentPane = new JPanel();
+	         ((JComponent) contentPane).setBorder(new EmptyBorder(5, 5, 5, 5));
+	         setContentPane(contentPane);
+	         contentPane.setLayout(null);
+
+	         JLabel DeleteTableIpLabel = new JLabel("IP 주소");
+	         DeleteTableIpLabel.setBounds(60, 70, 50, 20);
+	         contentPane.add(DeleteTableIpLabel);
+
+	         JPanel DeleteTableIpEditorPanel = new JPanel();
+	         DeleteTableIpEditorPanel.setBounds(120, 70, 120, 20);
+	         contentPane.add(DeleteTableIpEditorPanel);
+	         DeleteTableIpEditorPanel.setLayout(null);
+
+	         DeleteTableIpWrite = new JTextField();
+	         DeleteTableIpWrite.setBounds(0, 0, 120, 20);
+	         DeleteTableIpEditorPanel.add(DeleteTableIpWrite);
+	         DeleteTableIpWrite.setColumns(10);
+
+	         TableDelete_Accept_Button = new JButton("Delete");
+	         TableDelete_Accept_Button.setBounds(50, 150, 80, 30);
+	         TableDelete_Accept_Button.addActionListener(new setAddressListener());
+	         contentPane.add(TableDelete_Accept_Button);
+
+	         TableDelete_Cancel_Button = new JButton("Cancel");
+	         TableDelete_Cancel_Button.setBounds(160, 150, 80, 30);
+	         TableDelete_Cancel_Button.addActionListener(new setAddressListener());
+	         contentPane.add(TableDelete_Cancel_Button);
+
+	         TableDelete_Accept_Button.addActionListener(new ActionListener() {
+	            public void actionPerformed(ActionEvent e) {
+	               dispose();
+	            }
+	         });
+
+	         TableDelete_Cancel_Button.addActionListener(new ActionListener() {
+	            public void actionPerformed(ActionEvent e) {
+	               dispose();
+	            }
+	         });
+
+	         setVisible(true);
+	      }
+	  }
 
    class setAddressListener implements ActionListener {
       @Override
@@ -416,6 +601,47 @@ public class ApplicationLayer extends JFrame implements BaseLayer {
 
               ((ARPLayer) m_LayerMgr.GetLayer("ARP")).ProxyTableDelete(deleteIpAddress);
           }
+    	  
+    	  if (e.getSource() == Static_Routing_Add_Button) {
+    		  new TableAdd();
+    	  }
+    	  
+    	  if (e.getSource() == Static_Routing_Delete_Button) {
+    		  new TableDelete();
+    	  }
+    	  
+    	  if (e.getSource() == TableAdd_Accept_Button) {
+    		  byte[] byteRoutingDestination = new byte[4];
+    		  byte[] byteRoutingNetmask = new byte[4];
+    		  
+    		  String routingDestination = RoutingDestinationWrite.getText();
+    		  String routingNetmask = RoutingNetmaskWrite.getText();
+    		  String routingGateway = RoutingGatewayWrite.getText();
+    		  String routingFlag = "";
+    		  String routingInterface = RoutingInterfaceWrite.getText();
+    		  
+    		  String[] stringRoutingDestination = routingDestination.split("\\.");
+              for (int i = 0; i < 4; i++) {
+            	  byteRoutingDestination[i] = (byte) (Integer.parseInt(stringRoutingDestination[i])); 
+              }
+              
+              String[] stringRoutingNetmask = routingNetmask.split("\\.");
+              for (int i = 0; i < 4; i++) {
+            	  byteRoutingNetmask[i] = (byte) (Integer.parseInt(stringRoutingNetmask[i]));
+              }
+              
+              if (UP_Box.isSelected()) {
+            	  routingFlag += "U";
+              }
+              if (Gateway_Box.isSelected()) {
+            	  routingFlag += "G";
+              }
+              if (Host_Box.isSelected()) {
+            	  routingFlag += "H";
+              }
+
+              ((RoutingTable) m_LayerMgr.GetLayer("RT")).RoutingTableSet(byteRoutingDestination, byteRoutingNetmask, routingGateway, routingFlag, routingInterface);
+    	  }
       }
    }
    
@@ -443,6 +669,10 @@ public class ApplicationLayer extends JFrame implements BaseLayer {
 
    public void setDstMacAddress(String s) {
 	  dstMacAddress.setText(s);
+   }
+   
+   public void RoutingtablePrint(String s) {
+	   StaticRoutingTableArea.setText(s);
    }
 
    @Override
