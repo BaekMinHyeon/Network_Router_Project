@@ -8,6 +8,10 @@ public class RoutingTable implements BaseLayer {
     public ArrayList<BaseLayer> p_aUpperLayer = new ArrayList<BaseLayer>();
     public ArrayList<_Router> routingtable = new ArrayList<_Router>();
     
+    public RoutingTable(String pName){
+    	pLayerName = pName;
+    }
+    
     public class _Router {
     	byte[] ip_dst_addr = new byte[4];
     	byte[] subnet_mask = new byte[4];
