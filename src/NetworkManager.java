@@ -21,7 +21,7 @@ public class NetworkManager {
 
 	}
 
-    public JNetManager() {
+    public NetworkManager() {
 	    StringBuilder errbuf = new StringBuilder();
         ArrayList<PcapIf> allDevs = new ArrayList<PcapIf>();
         if(Pcap.findAllDevs(allDevs, errbuf) != Pcap.OK) {
