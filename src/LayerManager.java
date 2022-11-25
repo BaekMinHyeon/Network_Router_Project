@@ -51,6 +51,9 @@ public class LayerManager { //Layer를 관리해주는 클래스(계층간 연�
 	public void ConnectLayers(String pcList){
 		MakeList(pcList);
 		LinkLayer(mp_sListHead); //mPList에 넣은 값들과 연결
+		mp_sListHead = null;
+		mp_sListTail = null;
+		m_nTop = -1;
 	}
 
 	private void MakeList(String pcList){ //들어오는 Layer 이름을 token으로 잘름
