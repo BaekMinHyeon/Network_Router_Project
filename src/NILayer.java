@@ -1,5 +1,6 @@
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
@@ -24,7 +25,7 @@ public class NILayer implements BaseLayer {
 	public NILayer(String pName) {
 		// super(pName);
 		pLayerName = pName;
-		device = RoutingTable.jnet.getPcapIf();
+		device = ApplicationLayer.nm.getPcapIf();
 		m_pAdapterList = new ArrayList<PcapIf>();
 		m_iNumAdapter = 0;
 		PacketStartDriver();
@@ -39,16 +40,16 @@ public class NILayer implements BaseLayer {
 		int flags = Pcap.MODE_PROMISCUOUS; // capture all packets
 		int timeout = 10 * 1000; // 10 seconds in millis
 		StringBuilder errbuf = new StringBuilder();
-		m_AdapterObject = Pcap.openLive(m_pAdapter.getName(), snaplen, flags, timeout, errbuf);
+		m_AdapterObject = Pcap.openLive(device.getName(), snaplen, flags, timeout, errbuf);
 	}
 
 	public byte[] getAdapterIP() {
-		return this.m_pAdapter.getAddresses().get(0).getAddr().getData();
+		return this.device.getAddresses().get(0).getAddr().getData();
 	}
 	
 	public byte[] getAdapterMAC() {
 		try {
-			return this.m_pAdapter.getHardwareAddress();
+			return this.device.getHardwareAddress();
 		} catch(IOException err) {
 			err.printStackTrace();
 		}
