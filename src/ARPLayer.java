@@ -203,8 +203,8 @@ public class ARPLayer implements BaseLayer {
         return false;
     }
 
-    public boolean ProxyTableSet(String interface, byte[] enthernet_addr, byte[] ip_addr) {
-        proxyTable.add(new _PROXY_ARP_ARR(interface, enthernet_addr, ip_addr));
+    public boolean ProxyTableSet(String inter_face, byte[] enthernet_addr, byte[] ip_addr) {
+        proxyTable.add(new _PROXY_ARP_ARR(inter_face, enthernet_addr, ip_addr));
         printProxyArp();
         return true;
     }
@@ -350,7 +350,7 @@ public class ARPLayer implements BaseLayer {
                 if(j != 3)
                     ip += ".";
             }
-            s +=  proxyTable.get(i).name + "   " + ip + "   "  + real_address + "\n";
+            s +=  proxyTable.get(i).inter_face + "   " + ip + "   "  + real_address + "\n";
         }
         chatfiledlg.proxyTablePrint(s);
     }
@@ -498,12 +498,12 @@ public class ARPLayer implements BaseLayer {
 
     public class _PROXY_ARP_ARR {
 
-        String interface;
+        String inter_face;
         _ARP_ENTHERNET_ADDR enet_target_addr;
         _ARP_IP_ADDR ip_target_addr;
 
-        public _PROXY_ARP_ARR(String interface, byte[] enthernet_addr, byte[] ip_addr) {
-            this.interface = interface;
+        public _PROXY_ARP_ARR(String inter_face, byte[] enthernet_addr, byte[] ip_addr) {
+            this.inter_face = inter_face;
             enet_target_addr = new _ARP_ENTHERNET_ADDR(enthernet_addr);
             ip_target_addr = new _ARP_IP_ADDR(ip_addr);
         }

@@ -36,6 +36,7 @@ public class ApplicationLayer extends JFrame implements BaseLayer {
    public ArrayList<BaseLayer> p_aUpperLayer = new ArrayList<BaseLayer>();
    BaseLayer UnderLayer;
    private static LayerManager m_LayerMgr = new LayerManager();
+   public static NetworkManager nm;
 
    private JTextField DestinationWrite;
    private JTextField NetmaskWrite;
@@ -97,6 +98,8 @@ public class ApplicationLayer extends JFrame implements BaseLayer {
    private String address;
 
    public static void main(String[] args) {
+      nm = new NetworkManager();
+
       m_LayerMgr.AddLayer(new NILayer("NI"));
       m_LayerMgr.AddLayer(new EthernetLayer("Ethernet"));
       m_LayerMgr.AddLayer(new ARPLayer("ARP"));
@@ -115,6 +118,14 @@ public class ApplicationLayer extends JFrame implements BaseLayer {
       
       m_LayerMgr.ConnectLayers("NI2 ( *Ethernet2 ( *IP2 ( *RT ( *GUI ) ) ) )");
       m_LayerMgr.ConnectLayers("Ethernet2 ( *ARP2 ( +IP2 ) )");
+
+      byte[] mac1 = ((NILayer)m_LayerMgr.GetLayer("NI")).getAdapterMAC();
+		((EthernetLayer)m_LayerMgr.GetLayer("Ethernet")).SetEnetSrcAddress(mac1);
+		byte[] mac2 = ((NILayer)m_LayerMgr.GetLayer("NI2")).getAdapterMAC();
+		((EthernetLayer)m_LayerMgr.GetLayer("Ethernet2")).SetEnetSrcAddress(mac2);
+				
+		m_LayerMgr.GetLayer("NI").Receive();
+		m_LayerMgr.GetLayer("NI2").Receive();
    }
 
    public ApplicationLayer(String pName) {
