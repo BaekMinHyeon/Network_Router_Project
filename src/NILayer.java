@@ -59,12 +59,14 @@ public class NILayer implements BaseLayer {
 	public boolean Send(byte[] input, int length) {
 
 		ByteBuffer buf = ByteBuffer.wrap(input);
+		System.out.println("hi"+String.format("%d.%d.%d.%d", input[38]&0xff, input[39]&0xff, input[40]&0xff, input[41]&0xff));
 		if (m_AdapterObject.sendPacket(buf) != Pcap.OK) {
 			System.err.println(m_AdapterObject.getErr());
 			return false;
 		}
 		return true;
 	}
+	
 
 	public boolean Receive() {
 		Receive_Thread thread = new Receive_Thread(m_AdapterObject, this.GetUpperLayer(0));

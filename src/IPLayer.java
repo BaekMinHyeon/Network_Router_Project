@@ -56,25 +56,26 @@ public class IPLayer implements BaseLayer {
        }
     }
     
-    public boolean Send(){   
+    public boolean Send(){
+    	System.out.println(777776);
        byte[] data = ObjToByte(m_sHeader, m_sHeader.ip_data, m_sHeader.ip_data.length); // header 추가
-       EthernetLayer ethernetLayer = (EthernetLayer)this.GetUnderLayer(0);
+       EthernetLayer ethernetLayer = (EthernetLayer)this.GetUnderLayer(1);
        ethernetLayer.Send(data, data.length);
        return true;
     }
     
     public boolean SendARP(byte[] transfer_dst){ 
-		ARPLayer arpLayer = (ARPLayer) this.GetUnderLayer(1);
+		ARPLayer arpLayer = (ARPLayer) this.GetUnderLayer(0);
+		arpLayer.SetIpDstAddress(transfer_dst);
 		arpLayer.autoChkArp(transfer_dst);
         return true;
      }
     
-    
+  
     public boolean Receive(byte[] input){
-       if(chkSrc(input) == true)
-          return false;
-       if(chkDst(input) == false)
-          return false;
+       if(chkSrc(input) == true){
+           return false;
+       }
        m_sHeader.ip_data = RemoveHeader(input, input.length);
        RoutingTable rt = (RoutingTable) this.GetUpperLayer(0);
        rt.Receive(input);

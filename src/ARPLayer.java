@@ -87,6 +87,8 @@ public class ARPLayer implements BaseLayer {
 
                 ApplicationLayer app = (ApplicationLayer)this.GetUpperLayer(0);
                 app.setDstMacAddress(real_address);
+                IPLayer ipLayer = (IPLayer)this.GetUpperLayer(1);
+                ipLayer.Send();
                 return;
             }
         }
@@ -231,8 +233,10 @@ public class ARPLayer implements BaseLayer {
         else if (temp_type == 2) {
             DestinationSet(input);
             ArpTableSet();
+            System.out.println("반갑습니다");
             for(_ARP_ARR addr : arpTable){
                 if(chkIpAddr(addr.ip_target_addr.addr, m_sHeader.ip_target_addr.addr)) {
+                	System.out.println("안녕하세요");
                     EthernetLayer ethernetLayer = (EthernetLayer)this.GetUnderLayer(0);
                     ethernetLayer.SetEnetDstAddress(m_sHeader.enet_target_addr.addr);
 
@@ -247,8 +251,10 @@ public class ARPLayer implements BaseLayer {
                             real_address += "-";
                     }
 
-                    ApplicationLayer chatFileDlg = (ApplicationLayer)this.GetUpperLayer(0);
-                    chatFileDlg.setDstMacAddress(real_address);
+                    ApplicationLayer app = (ApplicationLayer)this.GetUpperLayer(0);
+                    app.setDstMacAddress(real_address);
+                    IPLayer ipLayer = (IPLayer)this.GetUnderLayer(1);
+                    ipLayer.Send();
                 }
             }
             return true;
