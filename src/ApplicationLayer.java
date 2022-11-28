@@ -113,17 +113,33 @@ public class ApplicationLayer extends JFrame implements BaseLayer {
       m_LayerMgr.AddLayer(new ApplicationLayer("GUI"));
       m_LayerMgr.AddLayer(new RoutingTable("RT"));
       
-      m_LayerMgr.ConnectLayers("NI ( *Ethernet ( *ARP ( +GUI ) *IP ( -ARP *RT ( *GUI ) ) ) )");
-      m_LayerMgr.ConnectLayers("NI2 ( *Ethernet2 ( *ARP2 ( +GUI ) *IP2 ( -ARP2 *RT ( *GUI ) ) ) )");
+      m_LayerMgr.ConnectLayers("NI ( *Ethernet ( *ARP ( +GUI *IP ) *IP ( *RT ( *GUI ) ) ) )");
+      m_LayerMgr.ConnectLayers("NI2 ( *Ethernet2 ( *ARP2 ( +GUI *IP2 ) *IP2 ( *RT ( *GUI ) ) ) )");
       
       byte[] mac1 = ((NILayer)m_LayerMgr.GetLayer("NI")).getAdapterMAC();
       ((EthernetLayer)m_LayerMgr.GetLayer("Ethernet")).SetEnetSrcAddress(mac1);
       byte[] mac2 = ((NILayer)m_LayerMgr.GetLayer("NI2")).getAdapterMAC();
       ((EthernetLayer)m_LayerMgr.GetLayer("Ethernet2")).SetEnetSrcAddress(mac2);
       
-      System.out.println((m_LayerMgr.GetLayer("Ethernet")).GetUpperLayer(0));
-      System.out.println((m_LayerMgr.GetLayer("Ethernet")).GetUpperLayer(1));
-      System.out.println((m_LayerMgr.GetLayer("NI2")).GetUpperLayer(0));
+      
+      ((ARPLayer)m_LayerMgr.GetLayer("ARP")).SetEnetSrcAddress(mac1);
+      ((ARPLayer)m_LayerMgr.GetLayer("ARP2")).SetEnetSrcAddress(mac2);
+      
+      String src_ip1 = "192.168.1.1";
+      String[] ip1 = src_ip1.split("\\.");
+      byte[] byte_ip1 = new byte[4];
+      for(int i = 0; i < 4; i++)
+    	 byte_ip1[i] = (byte) (Integer.parseInt(ip1[i]));
+      
+      String src_ip2 = "192.168.2.1";
+      String[] ip2 = src_ip2.split("\\.");
+      byte[] byte_ip2 = new byte[4];
+      for(int i = 0; i < 4; i++)
+    	 byte_ip2[i] = (byte) (Integer.parseInt(ip2[i]));
+      
+      ((ARPLayer)m_LayerMgr.GetLayer("ARP")).SetIpSrcAddress(byte_ip1);
+      ((ARPLayer)m_LayerMgr.GetLayer("ARP2")).SetIpSrcAddress(byte_ip2);
+      
       m_LayerMgr.GetLayer("NI").Receive();
       m_LayerMgr.GetLayer("NI2").Receive();
    }
