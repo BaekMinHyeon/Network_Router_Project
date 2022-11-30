@@ -55,25 +55,34 @@ public class RoutingTable implements BaseLayer {
         for(_Router row : routingtable){
      	   byte[] subnetmask = row.subnet_mask;
      	   byte[] result = Calculation(dst, subnetmask);
-     	   if(row.ip_dst_addr.equals(result)){
+     	   String sresult = Byte4ToString(result);
+     	   String sdst = Byte4ToString(row.ip_dst_addr);
+     	   if(sdst.equals(sresult)){
      		   match = routingtable.get(index);
      		   break;
      	   }
      	   index++;
         }
-        if(match.flag.equals("U")){}
+        if(match == null){
+        	System.out.println(66);
+     	    return false;
+        }
+        else if(match.flag.equals("U")){
+        	transfer_dst = dst;
+        }
         else if(match.flag.equals("UG")){
      	   transfer_dst = StringToByte4(match.gateway);
         }
         else if(match.flag.equals("UH")){ // IP는 자신에게 오는 것을 거절하는데 이것이 왜 필요하지?
      	   transfer_dst = dst;
         }
-        else{
-     	   return false;
-        }
+        else
+        	return false;
         String port = (match.inter_face).substring(4);
         int portnum = Integer.parseInt(port);
+        System.out.println(portnum);
         IPLayer ipLayer = (IPLayer)this.GetUnderLayer(portnum-1);
+        System.out.println(Byte4ToString(transfer_dst));
         ipLayer.SendARP(transfer_dst);
         
         return true;
@@ -110,7 +119,7 @@ public class RoutingTable implements BaseLayer {
             String inter_face = routingtable.get(i).inter_face;
             String metric = Integer.toString(routingtable.get(i).metric);
             
-            s = dst + "   " + subnetmask + "   " + gateway + "   " + flag + "   " + inter_face + "   " + metric + "\n";
+            s += dst + "   " + subnetmask + "   " + gateway + "   " + flag + "   " + inter_face + "   " + metric + "\n";
         }
         applicationLayer.RoutingtablePrint(s);
     }
