@@ -482,10 +482,10 @@ public class ARPLayer implements BaseLayer {
         _ARP_IP_ADDR ip_target_addr = new _ARP_IP_ADDR();
 
         public _ARP_Frame() {
-            hard_type[0] = 0x01;
-            hard_type[1] = 0x00;
-            prot_type[0] = 0x00;
-            prot_type[1] = 0x08;
+            hard_type[0] = 0x00;
+            hard_type[1] = 0x01;
+            prot_type[0] = 0x08;
+            prot_type[1] = 0x00;
             hard_size[0] = 6;
             prot_size[0] = 4;
         }
