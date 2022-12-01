@@ -74,19 +74,7 @@ public class ARPLayer implements BaseLayer {
                     &&addr.ip_target_addr.addr[3] == ip_addr[3]) {
                 EthernetLayer ethernetLayer = (EthernetLayer)this.GetUnderLayer(0);
                 ethernetLayer.SetEnetDstAddress(addr.enet_target_addr.addr);
-                String address = new java.math.BigInteger(addr.enet_target_addr.addr).toString(16);
-                String real_address = "";
-                while (address.length() != 12) {
-                    address = "0" + address;
-                }
-                for (int j = 0; j < address.length(); j++) {
-                    real_address += address.charAt(j);
-                    if (j % 2 == 1 && j != address.length() - 1)
-                        real_address += "-";
-                }
 
-                ApplicationLayer app = (ApplicationLayer)this.GetUpperLayer(0);
-                app.setDstMacAddress(real_address);
                 IPLayer ipLayer = (IPLayer)this.GetUpperLayer(1);
                 ipLayer.Send();
                 return;
@@ -156,6 +144,7 @@ public class ARPLayer implements BaseLayer {
     }
 
     public boolean ArpTableSet() {
+    	ApplicationLayer applicationLayer = (ApplicationLayer) this.GetUpperLayer(0);
         for(_ARP_ARR addr : arpTable){
             if(addr.ip_target_addr.addr[0] ==  m_sHeader.ip_target_addr.addr[0]
                     && addr.ip_target_addr.addr[1] ==  m_sHeader.ip_target_addr.addr[1]
@@ -167,12 +156,13 @@ public class ARPLayer implements BaseLayer {
                 addr.enet_target_addr.addr[3] = m_sHeader.enet_target_addr.addr[3];
                 addr.enet_target_addr.addr[4] = m_sHeader.enet_target_addr.addr[4];
                 addr.enet_target_addr.addr[5] = m_sHeader.enet_target_addr.addr[5];
-                printArp();
+                
+                applicationLayer.arpAllPrint();
                 return true;
             }
         }
         arpTable.add(new _ARP_ARR(m_sHeader.enet_target_addr.addr, m_sHeader.ip_target_addr.addr));
-        printArp();
+        applicationLayer.arpAllPrint();
         return true;
     }
 
@@ -196,7 +186,7 @@ public class ARPLayer implements BaseLayer {
                     && proxyTable.get(i).ip_target_addr.addr[1] ==  ip_addr[1]
                     && proxyTable.get(i).ip_target_addr.addr[2] ==  ip_addr[2]
                     && proxyTable.get(i).ip_target_addr.addr[3] ==  ip_addr[3]) {
-             
+
                 proxyTable.remove(i);
                 printProxyArp();
                 return true;
@@ -212,7 +202,7 @@ public class ARPLayer implements BaseLayer {
     }
 
     public synchronized boolean Receive(byte[] input) {
-    	int temp_type = byte2ToInt(input[6], input[7]);
+        int temp_type = byte2ToInt(input[6], input[7]);
         if (temp_type == 1) {
             DestinationSet(input);
             ArpTableSet();
@@ -233,27 +223,12 @@ public class ARPLayer implements BaseLayer {
         else if (temp_type == 2) {
             DestinationSet(input);
             ArpTableSet();
-            System.out.println("반갑습니다");
             for(_ARP_ARR addr : arpTable){
                 if(chkIpAddr(addr.ip_target_addr.addr, m_sHeader.ip_target_addr.addr)) {
-                	System.out.println("안녕하세요");
                     EthernetLayer ethernetLayer = (EthernetLayer)this.GetUnderLayer(0);
                     ethernetLayer.SetEnetDstAddress(m_sHeader.enet_target_addr.addr);
 
-                    String address = new java.math.BigInteger(m_sHeader.enet_target_addr.addr).toString(16);
-                    String real_address = "";
-                    while (address.length() != 12) {
-                        address = "0" + address;
-                    }
-                    for (int j = 0; j < address.length(); j++) {
-                        real_address += address.charAt(j);
-                        if (j % 2 == 1 && j != address.length() - 1)
-                            real_address += "-";
-                    }
-
-                    ApplicationLayer app = (ApplicationLayer)this.GetUpperLayer(0);
-                    app.setDstMacAddress(real_address);
-                    IPLayer ipLayer = (IPLayer)this.GetUnderLayer(1);
+                    IPLayer ipLayer = (IPLayer)this.GetUpperLayer(1);
                     ipLayer.Send();
                 }
             }
