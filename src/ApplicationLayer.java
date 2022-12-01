@@ -669,6 +669,18 @@ public class ApplicationLayer extends JFrame implements BaseLayer {
 
               ((RoutingTable) m_LayerMgr.GetLayer("RT")).RoutingTableSet(byteRoutingDestination, byteRoutingNetmask, routingGateway, routingFlag, routingInterface);
          }
+         
+         if (e.getSource() == TableDelete_Accept_Button) {
+        	 byte[] byteRoutingDestination = new byte[4];
+        	 String routingDestination = DeleteTableIpWrite.getText();
+        	 
+        	 String[] stringRoutingDestination = routingDestination.split("\\.");
+             for (int i = 0; i < 4; i++) {
+                byteRoutingDestination[i] = (byte) (Integer.parseInt(stringRoutingDestination[i])); 
+             }
+             
+             ((RoutingTable) m_LayerMgr.GetLayer("RT")).RoutingTableDelete(byteRoutingDestination);
+         }
       }
    }
    
@@ -686,17 +698,23 @@ public class ApplicationLayer extends JFrame implements BaseLayer {
       return MacAddress;
    }
    
+   public String arpTable = "";
+   
    public void tablePrint(String s){
-     ArpCacheTableArea.setText(s);
+	 arpTable += (s + "\n");
+     ArpCacheTableArea.setText(arpTable);
    }
 
    public void proxyTablePrint(String s) {
      ProxyArpEntryArea.setText(s);
    }
-
-   public void setDstMacAddress(String s) {
-     dstMacAddress.setText(s);
+   
+   public void arpAllPrint(){
+	 ((ARPLayer)m_LayerMgr.GetLayer("ARP")).printArp();
+	 ((ARPLayer)m_LayerMgr.GetLayer("ARP2")).printArp();
+	 arpTable = "";
    }
+
    
    public void RoutingtablePrint(String s) {
       StaticRoutingTableArea.setText(s);
