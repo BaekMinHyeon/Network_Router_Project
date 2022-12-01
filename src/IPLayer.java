@@ -57,14 +57,29 @@ public class IPLayer implements BaseLayer {
     }
     
     public boolean Send(){
-    	System.out.println(777776);
        byte[] data = ObjToByte(m_sHeader, m_sHeader.ip_data, m_sHeader.ip_data.length); // header 추가
        EthernetLayer ethernetLayer = (EthernetLayer)this.GetUnderLayer(1);
        ethernetLayer.Send(data, data.length);
        return true;
     }
     
-    public boolean SendARP(byte[] transfer_dst){ 
+    public boolean SendARP(byte[] transfer_dst, byte[] input){ 
+    	m_sHeader.ip_verlen = input[0];
+        m_sHeader.ip_tos = input[1];
+        for(int i = 0; i < 2; i++){
+     	   m_sHeader.ip_len[i] = input[2+i];
+     	   m_sHeader.ip_id[i] = input[4+i];
+     	   m_sHeader.ip_fragoff[i] = input[6+i];
+     	   m_sHeader.ip_cksum[i] = input[10+i];
+        }
+        m_sHeader.ip_ttl = input[8];
+        m_sHeader.ip_proto = input[9];
+        for(int i = 0; i < 4; i++){
+     	   m_sHeader.ip_src.addr[i] = input[12+i];
+            m_sHeader.ip_dst.addr[i] = input[16+i];
+        }
+        m_sHeader.ip_data = new byte[input.length-Header_Size];
+        System.arraycopy(input, 20, m_sHeader.ip_data, 0, m_sHeader.ip_data.length);
 		ARPLayer arpLayer = (ARPLayer) this.GetUnderLayer(0);
 		arpLayer.SetIpDstAddress(transfer_dst);
 		arpLayer.autoChkArp(transfer_dst);
@@ -90,7 +105,8 @@ public class IPLayer implements BaseLayer {
     	   m_sHeader.ip_src.addr[i] = input[12+i];
            m_sHeader.ip_dst.addr[i] = input[16+i];
        }
-       m_sHeader.ip_data = RemoveHeader(input, input.length);
+       m_sHeader.ip_data = new byte[input.length-Header_Size];
+       System.arraycopy(input, 20, m_sHeader.ip_data, 0, m_sHeader.ip_data.length);
        RoutingTable rt = (RoutingTable) this.GetUpperLayer(0);
        rt.Receive(input);
        return true;
