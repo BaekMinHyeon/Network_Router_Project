@@ -37,7 +37,9 @@ public class RoutingTable implements BaseLayer {
     
     public boolean RoutingTableDelete(byte[] ip_addr){
     	for(int i = 0; i < routingtable.size(); i++){
-            if (routingtable.get(i).ip_dst_addr.equals(ip_addr)) {
+    		String s1 = Byte4ToString(routingtable.get(i).ip_dst_addr);
+    		String s2 = Byte4ToString(ip_addr);
+            if (s1.equals(s2)) {
                 routingtable.remove(i);
                 printRT();
                 return true;
@@ -64,7 +66,6 @@ public class RoutingTable implements BaseLayer {
      	   index++;
         }
         if(match == null){
-        	System.out.println(66);
      	    return false;
         }
         else if(match.flag.equals("U")){
@@ -80,10 +81,8 @@ public class RoutingTable implements BaseLayer {
         	return false;
         String port = (match.inter_face).substring(4);
         int portnum = Integer.parseInt(port);
-        System.out.println(portnum);
         IPLayer ipLayer = (IPLayer)this.GetUnderLayer(portnum-1);
-        System.out.println(Byte4ToString(transfer_dst));
-        ipLayer.SendARP(transfer_dst);
+        ipLayer.SendARP(transfer_dst, input);
         
         return true;
     }
